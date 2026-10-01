@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Mind4D: prior-guided dynamic scenes from fMRI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,500,600" rel="stylesheet" type="text/css">
+    <style>
+        body {
+            font-family: "Source Sans Pro", sans-serif;
+            color: #313437;
+            background: #fff;
+            padding-bottom: 60px;
+        }
+        .highlight-clean { padding: 40px 0 10px; }
+        .highlight-clean h2, .highlight-clean h3 { font-weight: 600; color: #313437; }
+        .highlight-clean p { color: #4b5154; font-size: 16px; line-height: 1.55; }
+        .container-page { max-width: 860px; }
+        .divider { border: 0; border-top: 1px solid #e3e3e3; margin: 28px 0; }
+        .muted { color: #7d8285; font-size: 14px; }
+        .figure-wrap { text-align: center; margin: 12px 0 8px; }
+        .figure-wrap img, .figure-wrap video { width: 100%; border: 1px solid #e6e6e6; border-radius: 4px; background: #fafafa; }
+        .cap { font-size: 14px; color: #555; margin-top: 6px; text-align: center; }
+        .warn { background: #fff8e1; border-left: 4px solid #ffb300; padding: 12px 16px; margin: 16px 0; font-size: 15px; color: #313437; }
+        table.meta { font-size: 15px; }
+        table.meta td, table.meta th { vertical-align: top; }
+        code { background: #f4f4f4; padding: 1px 5px; border-radius: 3px; }
+        a { color: #055ada; }
+    </style>
+</head>
+
+<body>
+<div class="highlight-clean">
+    <div class="container container-page">
+        <h2 class="text-center">Mind4D: prior-guided dynamic scenes from fMRI</h2>
+        <p class="text-center muted" style="margin-bottom: 6px;">Anonymous supplementary page for a manuscript under review at TMLR</p>
+        <p class="text-center muted">Author identities, affiliations, and repository names are omitted.</p>
+
+        <div class="figure-wrap">
+            <img src="assets/teaser.jpg" alt="Task: a 2D video stimulus is decoded from fMRI into a dynamic 3D scene">
+        </div>
+    </div>
+
+    <hr class="divider" />
+
+    <div class="container container-page">
+        <h3>Overview</h3>
+        <p>
+            fMRI is recorded while a subject watches a 2D video. A subject-specific decoder maps that signal to a CLIP
+            embedding and a Stable-Diffusion VAE latent, split into foreground and background by a vector-quantized
+            codebook. Frozen image, video, and 3D priors then optimize a deformable 3D Gaussian foreground and a spherical
+            3D Gaussian background. The two are composited and rendered along a known camera orbit.
+        </p>
+        <p>
+            The decoded representation supplies semantic and coarse spatiotemporal anchors. Unobserved views, geometry, and
+            high-frequency motion are completed by the priors. There is no unobserved-view ground truth, so the orbits
+            below are prior-guided completions rather than metric reconstructions. Front-view SSIM is the only
+            view-aligned reconstruction score.
+        </p>
+        <div class="figure-wrap">
+            <img src="assets/pipeline.png" alt="Two-stage pipeline: fMRI decoding, then prior-guided 4D Gaussian optimization">
+            <div class="cap">Decoding stage (left) and prior-guided 4D stage (right).</div>
+        </div>
+
+        <div class="warn">
+            <b>Scope.</b> No unobserved-view ground truth exists for this task. The orbits below are prior-guided
+            completions, not metric multi-view reconstructions. Geometry scores test self-consistency of rendered depth
+            under known cameras. They are not depth error against ground truth.
+        </div>
+    </div>
+
+    <hr class="divider" />
+
+    <div class="container container-page">
+        <h3>4D Gaussian renders</h3>
+        <p>
+            Two orbits from the original qualitative runs. The top100 cohort, 100 clips, is the archive in Downloads.
+            <code>cameras.json</code> uses the same clip ids.
+        </p>
+        <div class="row">
+            <div class="col-md-6" style="margin-bottom: 16px;">
+                <div class="figure-wrap">
+                    <img src="assets/examples4d/22.gif" alt="4DGS orbit, clip 22">
+                    <div class="cap">clip 22</div>
+                </div>
+            </div>
+            <div class="col-md-6" style="margin-bottom: 16px;">
+                <div class="figure-wrap">
+                    <img src="assets/examples4d/216.gif" alt="4DGS orbit, clip 216">
+                    <div class="cap">clip 216</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="divider" />
+
+    <div class="container container-page">
+        <h3>Downloads</h3>
+        <p>These three files are the same 100 clips. Front-view scoring uses azimuth 90. The camera trajectory is shared across clips.</p>
+        <table class="table table-sm meta">
+            <thead><tr><th>File</th><th>Contents</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><a href="data/all_4d_orbits.tar">all_4d_orbits.tar</a></td>
+                    <td>Top100 cohort: 100 orbit renders, one file per clip, named <code>{clip_id}.gif</code>.</td>
+                </tr>
+                <tr>
+                    <td><a href="data/cameras.json">cameras.json</a></td>
+                    <td>Analytic 96-frame orbit for those same 100 clip ids.</td>
+                </tr>
+                <tr>
+                    <td><a href="data/top100_clip_ids.txt">top100_clip_ids.txt</a></td>
+                    <td>The 100 clip ids. They match the archive filenames and the keys in <code>cameras.json</code>.</td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="font-size: 15px;">
+            <b>NaN policy.</b> A blank or <code>nan</code> cell means the metric is undefined for that clip, typically an
+            empty foreground mask or no valid foreground depth. These cells are never filled with zero, so the effective
+            <code>n</code> differs across metrics.
+        </p>
+        <p class="muted" style="margin-top: 28px;">
+            This page contains no author, affiliation, funding, or repository identifiers, and is excluded from search indexing.
+        </p>
+    </div>
+</div>
+</body>
+</html>
